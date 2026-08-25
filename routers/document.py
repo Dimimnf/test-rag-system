@@ -1,11 +1,20 @@
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, File, UploadFile
 from fastapi.concurrency import run_in_threadpool
 
 from config import get_settings
 from logger import get_logger
+from routers.exceptions import (
+    DocumentIndexingHttpError,
+    InvalidDocumentHttpError,
+    LlmProviderHttpError,
+    QuestionProcessingHttpError,
+    RagNotReadyHttpError,
+    UnsupportedDocumentHttpError,
+    UploadTooLargeHttpError,
+)
 from schemas.document import (
     QuestionRequest,
     QuestionResponse,
@@ -59,26 +68,14 @@ async def upload_document(
         chunks = await run_in_threadpool(rag_service.change, temporary_path)
         return UploadDocumentResponse(filename=filename, chunks=chunks)
     except (UnsupportedUploadError, UnsupportedDocumentError) as error:
-        raise HTTPException(
-            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail=str(error),
-        ) from error
+        raise UnsupportedDocumentHttpError(str(error)) from error
     except UploadTooLargeError as error:
-        raise HTTPException(
-            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
-            detail=str(error),
-        ) from error
+        raise UploadTooLargeHttpError(str(error)) from error
     except (EmptyDocumentError, DocumentReadError) as error:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=str(error),
-        ) from error
+        raise InvalidDocumentHttpError(str(error)) from error
     except Exception as error:
         logger.exception("Не удалось обработать загруженный документ")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Не удалось проиндексировать документ",
-        ) from error
+        raise DocumentIndexingHttpError() from error
     finally:
         # Временный upload удаляется при любом результате индексирования.
         if temporary_path is not None:
@@ -104,18 +101,9 @@ async def ask_document(request: QuestionRequest) -> QuestionResponse:
         answer = await run_in_threadpool(llm_service.answer, request.question)
         return QuestionResponse(answer=answer)
     except RagNotReadyError as error:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=str(error),
-        ) from error
+        raise RagNotReadyHttpError(str(error)) from error
     except LlmProviderError as error:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="Не удалось получить ответ модели",
-        ) from error
+        raise LlmProviderHttpError() from error
     except Exception as error:
         logger.exception("Не удалось ответить на вопрос по документу")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Не удалось обработать вопрос",
-        ) from error
+        raise QuestionProcessingHttpError() from error
