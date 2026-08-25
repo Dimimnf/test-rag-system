@@ -5,8 +5,7 @@ from routers import document_router
 
 app = FastAPI(
     title="RAG Document Service",
-    description="Поиск и генерация ответов по одному активному TXT или PDF.",
-    version="0.1.0",
+    description="Поиск и генерация ответов по одному активному TXT или PDF."
 )
 app.include_router(document_router)
 
