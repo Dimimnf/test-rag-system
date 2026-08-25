@@ -3,6 +3,7 @@
 /data/
 /logs/
 /.env
+/.pytest-tmp/
 **/__pycache__/
 *.py[cod]
 
