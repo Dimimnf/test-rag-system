@@ -1,6 +1,0 @@
-
-class GetInfoFromDocument():
-    ...
-
-class UploadDocument():
-    ...
