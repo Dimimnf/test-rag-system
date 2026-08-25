@@ -1,11 +1,25 @@
 [project]
 name = "test-rag-system"
 version = "0.1.0"
-description = "Add your description here"
+description = "FastAPI-сервис для вопросов по TXT и PDF с использованием RAG"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.141.1",
     "langchain>=1.3.17",
+    "langchain-chroma>=1.1.0",
     "langchain-community>=0.4.2",
+    "langchain-huggingface>=1.2.2",
+    "langchain-openai>=1.6.0",
+    "pydantic-settings>=2.15.0",
+    "pypdf>=6.16.2",
+    "python-multipart>=0.0.32",
+    "sentence-transformers>=6.0.0",
+    "uvicorn[standard]>=0.52.4",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=8.4.2",
 ]

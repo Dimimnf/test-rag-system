@@ -1,2 +1,14 @@
-.idea/vcs.xml
-/.idea
+/.idea/
+/.kilo/
+/data/
+/logs/
+/.env
+**/__pycache__/
+*.py[cod]
+
+# Локальные инструкции и исходное техническое задание не публикуются.
+/AGENTS.md
+/agents.md
+/tz.text
+/TZ.txt
+*.pyc
